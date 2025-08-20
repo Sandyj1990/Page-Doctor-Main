@@ -56,6 +56,29 @@ async function initializeServices() {
 
 // API Routes
 
+// Welcome page
+app.get('/', (req, res) => {
+  res.json({
+    message: '🚀 Page Doctor API is Live!',
+    status: 'active',
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      'GET /health': 'Health check',
+      'POST /api/crawl-single': 'Single page crawl',
+      'POST /api/crawl-website': 'Website discovery', 
+      'POST /api/seo-audit': 'Comprehensive SEO audit',
+      'POST /api/domain-analytics': 'Domain analytics',
+      'POST /api/top-pages': 'Top pages analysis'
+    },
+    example: {
+      url: `${req.protocol}://${req.get('host')}/api/crawl-single`,
+      method: 'POST',
+      body: '{"url": "https://example.com"}'
+    },
+    docs: 'Send POST requests to the API endpoints above'
+  });
+});
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
