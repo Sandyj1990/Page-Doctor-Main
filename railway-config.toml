@@ -1,0 +1,19 @@
+[build]
+  builder = "nixpacks"
+
+[deploy]
+  startCommand = "npm run server"
+  healthcheckPath = "/health"
+  restartPolicyType = "always"
+
+[variables]
+  PORT = "3001"
+  NODE_ENV = "production"
+
+[services.web]
+  source = "."
+  build.command = "npm ci"
+  start.command = "npm run server"
+
+[services.database]
+  plugin = "postgresql" 

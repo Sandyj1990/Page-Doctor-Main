@@ -1,0 +1,35 @@
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react-swc";
+import path from "path";
+import { componentTagger } from "lovable-tagger";
+
+// https://vitejs.dev/config/
+export default defineConfig(({ mode }) => ({
+  server: {
+    host: "::",
+    port: 8080,
+    hmr: {
+      port: 8080,
+      overlay: false,
+    },
+  },
+  // Prevent Node.js modules from being bundled for browser
+  optimizeDeps: {
+    exclude: ['child_process', 'fs', 'path', 'os', 'crawlee', 'puppeteer', 'async_hooks']
+  },
+  build: {
+    rollupOptions: {
+      external: ['child_process', 'fs', 'path', 'os', 'crawlee', 'puppeteer', 'async_hooks']
+    }
+  },
+  plugins: [
+    react(),
+    mode === 'development' &&
+    componentTagger(),
+  ].filter(Boolean),
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+}));

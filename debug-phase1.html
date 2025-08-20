@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Phase 1 API Debug Test</title>
+</head>
+<body>
+    <h1>Phase 1 API Debug Test</h1>
+    <button onclick="testPhase1APIs()">Test Phase 1 APIs</button>
+    <div id="results"></div>
+
+    <script>
+        async function testPhase1APIs() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<h2>Testing Phase 1 APIs...</h2>';
+            
+            const domain = 'github.com';
+            
+            // Test 1: Whois API
+            try {
+                console.log('Testing Whois API...');
+                const whoisResponse = await fetch(`https://api.whoisjson.com/v1/${domain}`);
+                const whoisData = await whoisResponse.json();
+                results.innerHTML += `<h3>✅ Whois API: SUCCESS</h3><pre>${JSON.stringify(whoisData, null, 2).substring(0, 500)}...</pre>`;
+            } catch (error) {
+                results.innerHTML += `<h3>❌ Whois API: FAILED</h3><p>${error.message}</p>`;
+                console.error('Whois API failed:', error);
+            }
+
+            // Test 2: Wayback Machine API
+            try {
+                console.log('Testing Wayback API...');
+                const waybackResponse = await fetch(`https://web.archive.org/cdx/search/cdx?url=${domain}&output=json&limit=5`);
+                const waybackData = await waybackResponse.json();
+                results.innerHTML += `<h3>✅ Wayback API: SUCCESS</h3><p>Found ${waybackData.length - 1} snapshots</p>`;
+            } catch (error) {
+                results.innerHTML += `<h3>❌ Wayback API: FAILED</h3><p>${error.message}</p>`;
+                console.error('Wayback API failed:', error);
+            }
+
+            // Test 3: Certificate Transparency
+            try {
+                console.log('Testing Certificate Transparency API...');
+                const ctResponse = await fetch(`https://crt.sh?q=${domain}&output=json&limit=10`);
+                const ctData = await ctResponse.json();
+                results.innerHTML += `<h3>✅ Certificate Transparency: SUCCESS</h3><p>Found ${ctData.length} certificates</p>`;
+            } catch (error) {
+                results.innerHTML += `<h3>❌ Certificate Transparency: FAILED</h3><p>${error.message}</p>`;
+                console.error('Certificate Transparency API failed:', error);
+            }
+
+            // Test 4: Test our service directly
+            try {
+                console.log('Testing OpenSourceAnalyticsService...');
+                // This will only work if we're on the main app page
+                if (window.openSourceAnalyticsService) {
+                    const serviceResult = await window.openSourceAnalyticsService.getOpenSourceAnalytics(domain);
+                    results.innerHTML += `<h3>✅ Service Test: SUCCESS</h3><pre>${JSON.stringify(serviceResult.data, null, 2).substring(0, 800)}...</pre>`;
+                } else {
+                    results.innerHTML += `<h3>⚠️ Service Test: Not available on this page</h3>`;
+                }
+            } catch (error) {
+                results.innerHTML += `<h3>❌ Service Test: FAILED</h3><p>${error.message}</p>`;
+                console.error('Service test failed:', error);
+            }
+        }
+    </script>
+</body>
+</html> 

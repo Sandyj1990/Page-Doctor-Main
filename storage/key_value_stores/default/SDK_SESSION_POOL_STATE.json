@@ -1,0 +1,87 @@
+{
+  "usableSessionsCount": 2,
+  "retiredSessionsCount": 0,
+  "sessions": [
+    {
+      "id": "session_PSEM6N57S9",
+      "cookieJar": {
+        "version": "tough-cookie@5.1.2",
+        "storeType": "MemoryCookieStore",
+        "rejectPublicSuffixes": true,
+        "enableLooseMode": false,
+        "allowSpecialUseDomain": true,
+        "prefixSecurity": "silent",
+        "cookies": []
+      },
+      "userData": {},
+      "maxErrorScore": 3,
+      "errorScoreDecrement": 0.5,
+      "expiresAt": "2025-08-19T17:55:13.122Z",
+      "createdAt": "2025-08-19T17:05:13.122Z",
+      "usageCount": 0,
+      "maxUsageCount": 50,
+      "errorScore": 0
+    },
+    {
+      "id": "session_fbkWT1VaoZ",
+      "cookieJar": {
+        "version": "tough-cookie@5.1.2",
+        "storeType": "MemoryCookieStore",
+        "rejectPublicSuffixes": true,
+        "enableLooseMode": false,
+        "allowSpecialUseDomain": true,
+        "prefixSecurity": "silent",
+        "cookies": [
+          {
+            "key": "_clck",
+            "value": "650hoc%5E2%5Efyl%5E0%5E2057",
+            "expires": "2026-08-19T17:05:22.000Z",
+            "domain": "jiocommerce.io",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2025-08-19T17:05:27.506Z",
+            "lastAccessed": "2025-08-19T17:05:27.506Z"
+          },
+          {
+            "key": "_ga",
+            "value": "GA1.1.1679514706.1755623117",
+            "expires": "2026-09-23T17:05:16.884Z",
+            "domain": "jiocommerce.io",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2025-08-19T17:05:27.516Z",
+            "lastAccessed": "2025-08-19T17:05:27.516Z"
+          },
+          {
+            "key": "_clsk",
+            "value": "1e0w49y%5E1755623123552%5E1%5E1%5Eb.clarity.ms%2Fcollect",
+            "expires": "2025-08-20T17:05:23.000Z",
+            "domain": "jiocommerce.io",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2025-08-19T17:05:27.522Z",
+            "lastAccessed": "2025-08-19T17:05:27.522Z"
+          },
+          {
+            "key": "_ga_FMV8PY3WHY",
+            "value": "GS2.1.s1755623116$o1$g0$t1755623116$j60$l0$h0",
+            "expires": "2026-09-23T17:05:16.884Z",
+            "domain": "jiocommerce.io",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2025-08-19T17:05:27.522Z",
+            "lastAccessed": "2025-08-19T17:05:27.522Z"
+          }
+        ]
+      },
+      "userData": {},
+      "maxErrorScore": 3,
+      "errorScoreDecrement": 0.5,
+      "expiresAt": "2025-08-19T17:55:13.131Z",
+      "createdAt": "2025-08-19T17:05:13.131Z",
+      "usageCount": 1,
+      "maxUsageCount": 50,
+      "errorScore": 0
+    }
+  ]
+}

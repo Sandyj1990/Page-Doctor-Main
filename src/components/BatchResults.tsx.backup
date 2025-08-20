@@ -1,0 +1,382 @@
+import { ReportCard } from './ReportCard';
+import { Card } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Globe, CheckCircle, ArrowLeft, Brain, Target, TrendingUp, Lightbulb } from 'lucide-react';
+import { useState, useEffect } from 'react';
+
+interface ScoreItem {
+  name: string;
+  score: number;
+  status: 'good' | 'warning' | 'poor';
+  description: string;
+  details: string[];
+  stats?: {
+    found: number;
+    total: number;
+    examples?: string[];
+  };
+}
+
+interface AuditResult {
+  overallScore: number;
+  writingQuality: ScoreItem[];
+  seoSignals: ScoreItem[];
+  structure: ScoreItem[];
+  technical: ScoreItem[];
+  url?: string; // Add URL to track which page this result belongs to
+}
+
+interface WebsiteInsights {
+  overallAnalysis: {
+    websiteType: string;
+    primaryPurpose: string;
+    targetAudience: string;
+    contentStrategy: string;
+    competitivePosition: string;
+  };
+  commonIssues: string[];
+  siteWideRecommendations: string[];
+  priorityActions: {
+    high: string[];
+    medium: string[];
+    low: string[];
+  };
+  contentGaps: string[];
+  technicalRecommendations: string[];
+}
+
+interface BatchResultsProps {
+  results: AuditResult[];
+  isLoading?: boolean;
+  progress?: number;
+  progressMessage?: string;
+  onBack?: () => void;
+}
+
+export const BatchResults = ({ results, isLoading, progress, progressMessage, onBack }: BatchResultsProps) => {
+  const [websiteInsights, setWebsiteInsights] = useState<WebsiteInsights | null>(null);
+  const [selectedUrl, setSelectedUrl] = useState<string | null>(null);
+  
+  // Check for website insights from session storage
+  useEffect(() => {
+    const storedInsights = sessionStorage.getItem('websiteInsights');
+    if (storedInsights) {
+      try {
+        const insights = JSON.parse(storedInsights);
+        setWebsiteInsights(insights);
+        // Clear from session storage after loading
+        sessionStorage.removeItem('websiteInsights');
+      } catch (error) {
+        console.error('Failed to parse website insights:', error);
+      }
+    }
+  }, [results]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-secondary/30 flex items-center justify-center p-4">
+        <Card className="p-8 shadow-lg border-0 bg-card/80 backdrop-blur-sm max-w-md w-full">
+          <div className="text-center space-y-6">
+            <div className="bg-primary/10 p-3 rounded-full w-fit mx-auto">
+              <Globe className="w-8 h-8 text-primary animate-spin" />
+            </div>
+            <div className="space-y-3">
+              <h2 className="text-xl font-semibold text-foreground">
+                Crawling & Auditing Website
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {progressMessage || 'Analyzing your website...'}
+              </p>
+              {progress !== undefined && (
+                <div className="space-y-2">
+                  <Progress value={progress} className="w-full" />
+                  <p className="text-xs text-muted-foreground">
+                    {progress > 15 ? 'Running parallel audits for faster results' : 'Discovering pages...'}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  if (results.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-secondary/30 flex items-center justify-center p-4">
+        <Card className="p-8 shadow-lg border-0 bg-card/80 backdrop-blur-sm max-w-md w-full text-center">
+          <h2 className="text-xl font-semibold text-foreground mb-2">No Results</h2>
+          <p className="text-muted-foreground">No pages were found to audit.</p>
+        </Card>
+      </div>
+    );
+  }
+
+  // Calculate overall website statistics
+  const totalScore = Math.round(results.reduce((sum, result) => sum + result.overallScore, 0) / results.length);
+  const totalPages = results.length;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-background to-secondary/30 p-4">
+      <div className="max-w-6xl mx-auto space-y-8">
+        {/* Back button */}
+        {onBack && (
+          <Button
+            onClick={onBack}
+            variant="outline"
+            className="mb-4"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            New Audit
+          </Button>
+        )}
+        
+        {/* Header with overall stats */}
+        <Card className="p-6 shadow-lg border-0 bg-card/80 backdrop-blur-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="bg-primary/10 p-2 rounded-full">
+                <CheckCircle className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <h1 className="text-2xl font-bold text-foreground">
+                    Website Audit Complete
+                  </h1>
+                  {websiteInsights && (
+                    <Badge className="bg-gradient-to-r from-purple-500 to-blue-500 text-white">
+                      <Brain className="w-3 h-3 mr-1" />
+                      AI Enhanced
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-muted-foreground">
+                  Analyzed {totalPages} pages across your website
+                  {websiteInsights && ' with AI-powered insights'}
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-3xl font-bold text-foreground">
+                {totalScore}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Overall Score
+              </div>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+            {/* Category averages */}
+            {['Writing Quality', 'SEO Signals', 'Structure', 'Technical'].map((category, index) => {
+              const categoryKey = ['writingQuality', 'seoSignals', 'structure', 'technical'][index] as keyof AuditResult;
+              const avgScore = Math.round(
+                results.reduce((sum, result) => {
+                  const categoryItems = result[categoryKey] as ScoreItem[];
+                  const categoryAvg = categoryItems.reduce((s, item) => s + item.score, 0) / categoryItems.length;
+                  return sum + categoryAvg;
+                }, 0) / results.length
+              );
+              
+              return (
+                <div key={category} className="text-center p-4 bg-secondary/20 rounded-lg">
+                  <div className="text-2xl font-semibold text-foreground">{avgScore}</div>
+                  <div className="text-sm text-muted-foreground">{category}</div>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+
+        {/* Website Insights and Page Results */}
+        <Tabs defaultValue={websiteInsights ? "insights" : "pages"} className="space-y-6">
+          <TabsList className={`grid w-full ${websiteInsights ? 'grid-cols-2' : 'grid-cols-1'}`}>
+            {websiteInsights && (
+              <TabsTrigger value="insights" className="flex items-center gap-2">
+                <Brain className="w-4 h-4" />
+                AI Website Insights
+              </TabsTrigger>
+            )}
+            <TabsTrigger value="pages" className="flex items-center gap-2">
+              <Globe className="w-4 h-4" />
+              {websiteInsights ? 'Page Results' : 'Individual Page Results'}
+            </TabsTrigger>
+          </TabsList>
+
+          {/* AI Website Insights Tab */}
+          {websiteInsights && (
+            <TabsContent value="insights" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Overall Analysis */}
+                <Card className="p-6 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 border border-purple-200 dark:border-purple-800">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Target className="w-5 h-5 text-purple-600" />
+                    <h3 className="text-lg font-semibold text-foreground">Website Overview</h3>
+                  </div>
+                  <div className="space-y-3 text-sm">
+                    <div>
+                      <span className="font-medium text-purple-900 dark:text-purple-200">Type:</span>
+                      <span className="ml-2 text-foreground">{websiteInsights.overallAnalysis.websiteType}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-purple-900 dark:text-purple-200">Purpose:</span>
+                      <span className="ml-2 text-foreground">{websiteInsights.overallAnalysis.primaryPurpose}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-purple-900 dark:text-purple-200">Target Audience:</span>
+                      <span className="ml-2 text-foreground">{websiteInsights.overallAnalysis.targetAudience}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-purple-900 dark:text-purple-200">Content Strategy:</span>
+                      <p className="mt-1 text-foreground">{websiteInsights.overallAnalysis.contentStrategy}</p>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Priority Actions */}
+                <Card className="p-6 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-950/20 dark:to-orange-950/20 border border-red-200 dark:border-red-800">
+                  <div className="flex items-center gap-3 mb-4">
+                    <TrendingUp className="w-5 h-5 text-red-600" />
+                    <h3 className="text-lg font-semibold text-foreground">Priority Actions</h3>
+                  </div>
+                  <div className="space-y-4">
+                    {websiteInsights.priorityActions.high.length > 0 && (
+                      <div>
+                        <h4 className="font-medium text-red-700 dark:text-red-300 mb-2">High Priority</h4>
+                        <ul className="space-y-1 text-sm">
+                          {websiteInsights.priorityActions.high.map((action, i) => (
+                            <li key={i} className="flex items-start gap-2">
+                              <span className="w-1.5 h-1.5 bg-red-600 rounded-full mt-2 shrink-0"></span>
+                              <span className="text-foreground">{action}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {websiteInsights.priorityActions.medium.length > 0 && (
+                      <div>
+                        <h4 className="font-medium text-orange-700 dark:text-orange-300 mb-2">Medium Priority</h4>
+                        <ul className="space-y-1 text-sm">
+                          {websiteInsights.priorityActions.medium.slice(0, 3).map((action, i) => (
+                            <li key={i} className="flex items-start gap-2">
+                              <span className="w-1.5 h-1.5 bg-orange-600 rounded-full mt-2 shrink-0"></span>
+                              <span className="text-foreground">{action}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </Card>
+
+                {/* Recommendations */}
+                <Card className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border border-green-200 dark:border-green-800">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Lightbulb className="w-5 h-5 text-green-600" />
+                    <h3 className="text-lg font-semibold text-foreground">Strategic Recommendations</h3>
+                  </div>
+                  <ul className="space-y-2 text-sm">
+                    {websiteInsights.siteWideRecommendations.map((rec, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <span className="w-1.5 h-1.5 bg-green-600 rounded-full mt-2 shrink-0"></span>
+                        <span className="text-foreground">{rec}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+
+                {/* Content Gaps */}
+                <Card className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Target className="w-5 h-5 text-blue-600" />
+                    <h3 className="text-lg font-semibold text-foreground">Content Opportunities</h3>
+                  </div>
+                  <div className="space-y-4">
+                    {websiteInsights.contentGaps.length > 0 && (
+                      <div>
+                        <h4 className="font-medium text-blue-700 dark:text-blue-300 mb-2">Missing Content Areas</h4>
+                        <ul className="space-y-1 text-sm">
+                          {websiteInsights.contentGaps.map((gap, i) => (
+                            <li key={i} className="flex items-start gap-2">
+                              <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 shrink-0"></span>
+                              <span className="text-foreground">{gap}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {websiteInsights.technicalRecommendations.length > 0 && (
+                      <div>
+                        <h4 className="font-medium text-indigo-700 dark:text-indigo-300 mb-2">Technical Improvements</h4>
+                        <ul className="space-y-1 text-sm">
+                          {websiteInsights.technicalRecommendations.slice(0, 3).map((rec, i) => (
+                            <li key={i} className="flex items-start gap-2">
+                              <span className="w-1.5 h-1.5 bg-indigo-600 rounded-full mt-2 shrink-0"></span>
+                              <span className="text-foreground">{rec}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              </div>
+            </TabsContent>
+          )}
+
+          {/* Individual Page Results Tab */}
+          <TabsContent value="pages" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {results.map((result, index) => {
+              // Extract page name from URL or use index
+              const pageUrl = result.url || `Page ${index + 1}`;
+              const pageName = (() => {
+                try {
+                  const url = new URL(pageUrl);
+                  const path = url.pathname;
+                  
+                  if (path === '/' || path === '') return 'Homepage';
+                  if (path.includes('contact')) return 'Contact Page';
+                  if (path.includes('about')) return 'About Page';
+                  if (path.includes('service')) return 'Services Page';
+                  if (path.includes('blog')) return 'Blog Page';
+                  
+                  const segments = path.split('/').filter(s => s.length > 0);
+                  if (segments.length > 0) {
+                    return segments[segments.length - 1]
+                      .replace(/-/g, ' ')
+                      .replace(/\b\w/g, l => l.toUpperCase()) + ' Page';
+                  }
+                  
+                  return pageUrl;
+                } catch {
+                  return pageUrl;
+                }
+              })();
+
+              return (
+                <div key={index} className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-foreground">{pageName}</h3>
+                    <span className="text-sm text-muted-foreground truncate max-w-xs ml-2">
+                      {pageUrl}
+                    </span>
+                  </div>
+                  <ReportCard 
+                    url={pageUrl} 
+                    onBack={() => {}} 
+                  />
+                </div>
+              );
+            })}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+};

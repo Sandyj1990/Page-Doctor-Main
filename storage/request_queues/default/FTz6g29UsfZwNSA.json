@@ -1,0 +1,9 @@
+{
+	"id": "FTz6g29UsfZwNSA",
+	"json": "{\"id\":\"FTz6g29UsfZwNSA\",\"url\":\"https://www.jiocommerce.io/\",\"loadedUrl\":\"https://www.jiocommerce.io/\",\"uniqueKey\":\"https://www.jiocommerce.io\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"depth\":0,\"__crawlee\":{\"state\":4}},\"handledAt\":\"2025-08-19T17:05:28.018Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://www.jiocommerce.io",
+	"url": "https://www.jiocommerce.io/"
+}
