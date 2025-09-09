@@ -40,7 +40,7 @@ export const fetchPageSpeedData = async (url: string) => {
     await pageSpeedRateLimit.throttle();
     
     // Build API URL with optional API key for higher quotas
-    const apiKey = import.meta.env.VITE_PAGESPEED_API_KEY;
+    const apiKey = (import.meta as any).env?.VITE_PAGESPEED_API_KEY;
     let apiUrl = `${PAGESPEED_API_URL}?url=${encodeURIComponent(url)}&category=performance&category=accessibility&category=best-practices&category=seo&strategy=desktop`;
     
     if (apiKey && apiKey !== 'your_pagespeed_api_key_here') {

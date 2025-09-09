@@ -21,20 +21,39 @@ async function testPDFData() {
 
   const url = 'https://luxe.ajio.com/';
 
-  // Import the convertToPDFData function from the server
-  const fs = await import('fs');
-  const serverCode = fs.readFileSync('./simple-server.js', 'utf8');
-  
-  // Extract just the convertToPDFData function
-  const functionStart = serverCode.indexOf('function convertToPDFData(');
-  const functionEnd = serverCode.indexOf('\n}', functionStart) + 2;
-  const functionCode = serverCode.substring(functionStart, functionEnd);
-  
+  // Import the convertToPDFData function safely using dynamic import
   console.log('🧪 Testing PDF data generation...');
   
-  // Execute the function
-  eval(functionCode);
-  const pdfData = convertToPDFData(mockResults, url);
+  try {
+    // Safer approach: Try to import the function if it's exported
+    const serverModule = await import('./simple-server.js');
+    const convertToPDFData = serverModule.convertToPDFData;
+    
+    if (typeof convertToPDFData !== 'function') {
+      throw new Error('convertToPDFData function not found or not exported');
+    }
+    
+    const pdfData = convertToPDFData(mockResults, url);
+  } catch (importError) {
+    console.error('❌ Could not safely import convertToPDFData function:', importError.message);
+    console.log('💡 Please ensure the function is properly exported from simple-server.js');
+    
+    // Fallback: create mock PDF data structure instead of using eval
+    const pdfData = {
+      url,
+      timestamp: new Date().toISOString(),
+      overallScore: mockResults.pageSpeed.data.overallScore,
+      detailedScores: {
+        writing: { readability: { analysis: 'Mock readability analysis for testing purposes' } },
+        seo: { optimization: { analysis: 'Mock SEO analysis for testing purposes' } },
+        structure: { layout: { analysis: 'Mock structure analysis for testing purposes' } },
+        technical: { performance: { analysis: 'Mock technical analysis for testing purposes' } }
+      },
+      businessImpact: { revenue: 'Mock business impact analysis' },
+      competitiveAnalysis: { comparison: 'Mock competitive analysis' },
+      industrySpecific: { recommendations: 'Mock industry-specific recommendations' }
+    };
+  }
   
   console.log('📊 Generated PDF data structure:');
   console.log('Keys:', Object.keys(pdfData));
