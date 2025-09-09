@@ -48,7 +48,7 @@ export class RateLimiter {
 }
 
 // Pre-configured rate limiters for common APIs
-const hasPageSpeedKey = !!import.meta.env.VITE_PAGESPEED_API_KEY;
+const hasPageSpeedKey = !!((import.meta as any).env?.VITE_PAGESPEED_API_KEY);
 export const pageSpeedRateLimit = new RateLimiter(
   100, // 100 calls per minute (Google's documented default quota)
   60 * 1000, // 1 minute window

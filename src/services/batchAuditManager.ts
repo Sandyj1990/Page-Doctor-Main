@@ -41,6 +41,8 @@ export class BatchAuditManager {
   private queue: BatchAuditRequest[] = [];
   private processing = new Set<string>();
   private auditService: ScalableAuditService;
+  private queueProcessorInterval: number | null = null;
+  private isShuttingDown = false;
 
   // Adaptive concurrency for batch processing
   private getAdaptiveConcurrency(): number {
@@ -60,6 +62,32 @@ export class BatchAuditManager {
 
     // Start processing queue
     this.startQueueProcessor();
+  }
+
+  /**
+   * Gracefully shutdown the batch audit manager
+   */
+  shutdown(): void {
+    console.log('🔄 Shutting down BatchAuditManager...');
+    this.isShuttingDown = true;
+    
+    if (this.queueProcessorInterval) {
+      clearInterval(this.queueProcessorInterval);
+      this.queueProcessorInterval = null;
+    }
+    
+    // Cancel all processing jobs
+    this.processing.clear();
+    
+    // Mark queued items as cancelled
+    this.queue.forEach(request => {
+      if (request.status === 'queued' || request.status === 'processing') {
+        request.status = 'cancelled';
+        request.error = 'System shutdown';
+      }
+    });
+    
+    console.log('✅ BatchAuditManager shutdown complete');
   }
 
   /**
@@ -229,8 +257,16 @@ export class BatchAuditManager {
    * Queue processor - runs continuously
    */
   private startQueueProcessor(): void {
-    setInterval(async () => {
-      await this.processQueue();
+    this.queueProcessorInterval = setInterval(async () => {
+      if (this.isShuttingDown) {
+        return;
+      }
+      
+      try {
+        await this.processQueue();
+      } catch (error) {
+        console.error('Queue processor error:', error);
+      }
     }, 5000); // Check every 5 seconds
   }
 
@@ -406,6 +442,22 @@ export class BatchAuditManager {
   }
 }
 
-// Export singleton instance
+// Export singleton instance with cleanup
 export const batchAuditManager = new BatchAuditManager();
+
+// Register cleanup handler for graceful shutdown (Node.js environment only)
+if (typeof window === 'undefined' && typeof globalThis !== 'undefined' && 'process' in globalThis) {
+  const cleanup = () => {
+    batchAuditManager.shutdown();
+  };
+  
+  // Use globalThis to access process safely
+  const nodeProcess = (globalThis as any).process;
+  if (nodeProcess && typeof nodeProcess.on === 'function') {
+    nodeProcess.on('SIGINT', cleanup);
+    nodeProcess.on('SIGTERM', cleanup);
+    nodeProcess.on('beforeExit', cleanup);
+  }
+}
+
 export default BatchAuditManager; 
